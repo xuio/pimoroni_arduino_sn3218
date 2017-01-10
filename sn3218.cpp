@@ -20,24 +20,14 @@
   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
   PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 */
-  
+
+#include "mbed.h"
 #include "sn3218.h"
-#include <Arduino.h>
 
-#ifdef __AVR_ATtiny85__
-#include <TinyWireM.h>
-#include <USI_TWI_Master.h>
-#else
-#include <Wire.h>
-#endif
-
-void _sn3218::begin(){
-#ifdef __AVR_ATtiny85__
-  TinyWireM.begin();
-#else
-  Wire.begin();
-#endif
-  this->enable();
+_sn3218::_sn3218(I2C* i2c_, PinName enablePin):SDB(enablePin){
+  i2c = i2c_;
+  // disable Chip
+  SDB = 0;
 }
 
 void _sn3218::update(){
@@ -50,11 +40,13 @@ void _sn3218::reset(){
 }
 
 void _sn3218::enable(){
+  SDB = 1;
   this->writeReg(SN3218_CMD_ENABLE_OUTPUT, 0x01); 
 }
 
 void _sn3218::disable(){
-  this->writeReg(SN3218_CMD_ENABLE_OUTPUT, 0x00); 
+  this->writeReg(SN3218_CMD_ENABLE_OUTPUT, 0x00);
+  SDB = 0;
 }
 
 void _sn3218::enable_leds( unsigned long enable_mask ){
@@ -70,15 +62,8 @@ void _sn3218::set( unsigned char chan, unsigned char val ){
 }
 
 void _sn3218::writeReg( unsigned char reg, unsigned char val ){
-#ifdef __AVR_ATtiny85__
-  TinyWireM.beginTransmission(SN3218_ADDR);
-  TinyWireM.send(reg);
-  TinyWireM.send(val);
-  TinyWireM.endTransmission();
-#else
   Wire.beginTransmission(SN3218_ADDR);
   Wire.write(reg);
   Wire.write(val);
   Wire.endTransmission();
-#endif
 }

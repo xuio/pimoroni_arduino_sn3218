@@ -24,6 +24,8 @@
 #ifndef _SN3218_H
 #define _SN3218_H
 
+#include "mbed.h"
+
 #define SN3218_ADDR 0x54
 
 #define SN3218_NUM_CHANNELS 18
@@ -54,20 +56,23 @@
 #define SN3218_CH_16 0x10000
 #define SN3218_CH_17 0x20000
 
-class _sn3218
-{
+class _sn3218{
   public:
-    void begin();
+    _sn3218(I2C* i2c_, PinName enablePin);
     void update();
     void enable();
-    void enable_leds( unsigned long enable_mask );
+    void enable_leds(unsigned long enable_mask);
     void disable();
     void reset();
-    void set( unsigned char chan, unsigned char val );
+    void set(unsigned char chan, unsigned char val);
  private:
-    virtual void writeReg( unsigned char reg, unsigned char val );
+    DigitalOut SDB;
+    I2C* i2c;
+    virtual void writeReg(unsigned char reg, unsigned char val);
 };
 
-namespace { _sn3218 sn3218; }
+namespace {
+  _sn3218 sn3218;
+}
 
 #endif
